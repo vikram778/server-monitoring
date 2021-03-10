@@ -52,17 +52,11 @@ type Report struct {
 	Err            error
 }
 
-type Error struct {
-	Server         string
-	ResponseStatus int
-	Err            string
-}
-
 func main() {
 
 	duration, _ := time.ParseDuration(os.Getenv("DURATION"))
 	for {
-		log.Println("starting job timestamp")
+		log.Println("starting job")
 		pingserver()
 		time.Sleep(duration)
 	}
@@ -71,12 +65,10 @@ func main() {
 func pingserver() {
 
 	var (
-		reschan   = make(chan Report)
-		errchan   = make(chan Error)
-		report    []Report
-		reporterr []Error
-		wg        = sync.WaitGroup{}
-		err       error
+		reschan = make(chan Report)
+		report  []Report
+		wg      = sync.WaitGroup{}
+		err     error
 	)
 
 	for _, i := range servers {
@@ -109,8 +101,6 @@ func pingserver() {
 		select {
 		case c := <-reschan:
 			report = append(report, c)
-		case e := <-errchan:
-			reporterr = append(reporterr, e)
 		}
 	}
 	log.Println("Generating Reports")
